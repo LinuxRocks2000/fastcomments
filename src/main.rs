@@ -78,8 +78,18 @@ struct AppState {
 
 impl AppState {
     async fn setup() -> anyhow::Result<AppState> {
+        let dbp = std::env::var("DATABASE_PATH")?;
+        let pool = if !std::fs::exists(&dbp)? {
+            std::fs::File::create(&dbp)?;
+            let pool = SqlitePool::connect(&dbp).await?;
+            sqlx::query("CREATE TABLE comments (page_url TEXT, username TEXT, content TEXT, id INTEGER PRIMARY KEY);").execute(&pool).await?;
+            pool
+        }
+        else {
+            SqlitePool::connect(&dbp).await?
+        };
         Ok(AppState {
-            database : SqlitePool::connect(&std::env::var("DATABASE_PATH")?).await?
+            database : pool
         })
     }
 }

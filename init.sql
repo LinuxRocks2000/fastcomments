@@ -1,1 +1,0 @@
-CREATE TABLE comments (page_url TEXT, username TEXT, content TEXT, id INTEGER PRIMARY KEY);
